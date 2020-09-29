@@ -1,24 +1,18 @@
 from flask import Flask, request, render_template
-from flask_cors import cross_origin
-import sklearn
 import pickle
 import pandas as pd
 
 app = Flask(__name__)
-model = pickle.load(open("flight_rf.pkl", "rb"))
+model = pickle.load(open("flight_model.pkl", "rb"))
 
 
 
 @app.route("/")
-@cross_origin()
 def home():
     return render_template("home.html")
 
 
-
-
-@app.route("/predict", methods = ["GET", "POST"])
-@cross_origin()
+@app.route("/predict", methods = ["POST"])
 def predict():
     if request.method == "POST":
 
@@ -259,46 +253,35 @@ def predict():
 
         # Destination
         # Banglore = 0 (not in column)
-        Source = request.form["Destination"]
-        if (Source == 'Cochin'):
+        Destination = request.form["Destination"]
+        if (Destination == 'Cochin'):
             d_Cochin = 1
             d_Delhi = 0
-            d_New_Delhi = 0
             d_Hyderabad = 0
             d_Kolkata = 0
         
-        elif (Source == 'Delhi'):
+        elif (Destination == 'Delhi'):
             d_Cochin = 0
             d_Delhi = 1
-            d_New_Delhi = 0
             d_Hyderabad = 0
             d_Kolkata = 0
 
-        elif (Source == 'New_Delhi'):
-            d_Cochin = 0
-            d_Delhi = 0
-            d_New_Delhi = 1
-            d_Hyderabad = 0
-            d_Kolkata = 0
 
-        elif (Source == 'Hyderabad'):
+        elif (Destination == 'Hyderabad'):
             d_Cochin = 0
             d_Delhi = 0
-            d_New_Delhi = 0
             d_Hyderabad = 1
             d_Kolkata = 0
 
-        elif (Source == 'Kolkata'):
+        elif (Destination == 'Kolkata'):
             d_Cochin = 0
             d_Delhi = 0
-            d_New_Delhi = 0
             d_Hyderabad = 0
             d_Kolkata = 1
 
         else:
             d_Cochin = 0
             d_Delhi = 0
-            d_New_Delhi = 0
             d_Hyderabad = 0
             d_Kolkata = 0
 
@@ -326,12 +309,12 @@ def predict():
             Total_stops,
             Journey_day,
             Journey_month,
-            Dep_hour,
-            Dep_min,
             Arrival_hour,
             Arrival_min,
             dur_hour,
             dur_min,
+            Dep_hour,
+            Dep_min,
             Air_India,
             GoAir,
             IndiGo,
@@ -350,17 +333,15 @@ def predict():
             d_Cochin,
             d_Delhi,
             d_Hyderabad,
-            d_Kolkata,
-            d_New_Delhi
+            d_Kolkata
         ]])
+        
+        if(Source==Destination):
+            output=0.0
+        else:
+            output=round(prediction[0],2)
 
-        output=round(prediction[0],2)
-
-        return render_template('home.html',prediction_text="Your Flight price is Rs. {}".format(output))
-
-
-    return render_template("home.html")
-
+        return render_template('result.html',prediction=format(output))
 
 
 
